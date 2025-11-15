@@ -188,31 +188,34 @@ tsc --noEmit        # Type check without emitting files
 
 ```
 nextjs-quick-starter/
-├── app/                    # Next.js App Router
-│   ├── actions.ts         # Server actions
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   ├── login/            # Login page
-│   ├── register/         # Register page
-│   ├── dashboard/        # Protected dashboard
-│   └── globals.css       # Global styles
-├── components/            # React components
-│   └── ui/               # shadcn/ui components
-├── db/                   # Database
-│   ├── index.ts         # Database client
-│   └── schema.ts        # Drizzle schema with Zod schemas
-├── lib/                  # Utility functions
-│   ├── auth.ts          # better-auth configuration
-│   └── auth-client.ts   # better-auth client hooks
-├── stores/              # TanStack React Store stores
-├── migrations/          # Drizzle migrations
-├── auth-schema.ts      # better-auth Drizzle schema (generated)
-├── proxy.ts            # Route protection middleware
-├── envConfig.ts        # Environment variable validation
-├── drizzle.config.ts   # Drizzle configuration
-├── biome.json          # Biome configuration
-├── lefthook.yml        # Git hooks configuration
-└── components.json     # shadcn/ui configuration
+├── app/                      # Next.js App Router
+│   ├── api/                  # API routes
+│   │   └── auth/             # better-auth API endpoints
+│   ├── actions.ts            # Server actions (CRUD operations)
+│   ├── layout.tsx            # Root layout with Toaster
+│   ├── page.tsx              # Home page
+│   ├── globals.css           # Global styles (Tailwind v4)
+│   └── favicon.ico           # App icon
+├── components/               # React components
+│   ├── ui/                   # shadcn/ui components
+│   │   └── sonner.tsx        # Toast component
+├── db/                       # Database (Drizzle ORM)
+│   ├── index.ts              # Database client
+│   └── schema.ts             # Drizzle schema with Zod schemas
+├── lib/                      # Utility functions
+│   ├── auth.ts               # better-auth server configuration
+│   ├── auth-client.ts        # better-auth client hooks
+│   └── utils.ts              # Utility functions (cn, etc.)
+├── stores/                   # TanStack React Store
+├── migrations/               # Drizzle database migrations
+├── auth-schema.ts            # better-auth Drizzle schema (generated)
+├── proxy.ts                  # Route protection (Next.js 16)
+├── envConfig.ts              # Environment variable validation (Zod)
+├── drizzle.config.ts         # Drizzle configuration
+├── biome.json                # Biome linter configuration
+├── lefthook.yml              # Git hooks configuration
+├── components.json           # shadcn/ui configuration
+├── tsconfig.json             # TypeScript configuration
 ```
 
 ## 🎯 Best Practices
