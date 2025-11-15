@@ -2,13 +2,77 @@
 
 ## 🎯 Critical Requirements
 
-**ALWAYS use these in every project:**
-1. **Zod** - Validate ALL inputs (forms, APIs, environment variables)
-2. **Node.js 24 LTS** - Current LTS version for deployment
-3. **pnpm** - Use pnpm as the package manager (not npm or yarn)
-4. **App Router** - Next.js 16 with server components by default
-5. **React 19** - Use useActionState, useFormStatus for forms
-6. **Biome** - Strict linting with tabs and double quotes
+**Security, Stability, and Best Practices - ALWAYS follow these principles:**
+
+### **1. Security-First Development**
+- ✅ **Runtime Validation** - Use **Zod** to validate inputs at runtime (forms, API requests, environment variables, database queries)
+- ✅ **Environment Security** - Never expose secrets client-side; use `NEXT_PUBLIC_` only for safe values
+- ✅ **Authentication** - Implement **better-auth** for type-safe, session-based authentication
+- ✅ **Authorization** - Always verify user permissions in server actions and API routes
+- ✅ **Input Sanitization** - Validate and sanitize all user inputs before processing or storing
+- ✅ **Database Security** - Use parameterized queries (Drizzle ORM handles this) to prevent SQL injection
+
+### **2. Type Safety Everywhere**
+- ✅ **TypeScript Strict Mode** - Enable strict type checking for compile-time safety
+- ✅ **Zod for Runtime Types** - Validate data at runtime with Zod schemas
+- ✅ **Type Inference** - Use `z.infer<>` for Zod types and `$inferSelect/$inferInsert` for Drizzle
+- ✅ **No `any` Types** - Avoid `any`; use `unknown` or proper types
+- ✅ **Explicit Return Types** - Define return types for all functions
+
+### **3. Latest Stable Versions**
+- ✅ **Node.js** - Use latest LTS version (currently Node.js 24 LTS)
+- ✅ **Next.js** - Use latest stable (Next.js 16+ with App Router)
+- ✅ **React** - Use latest stable (React 19+ with RSC and new hooks)
+- ✅ **TypeScript** - Use latest stable (TypeScript 5+)
+- ✅ **Package Manager** - Use **pnpm** (faster, more efficient than npm/yarn)
+
+### **4. Architecture & Patterns**
+- ✅ **Server Components First** - Default to React Server Components; use Client Components only when needed
+- ✅ **Server Actions** - Use server actions for mutations with progressive enhancement
+- ✅ **Separation of Concerns** - Keep business logic in server actions, UI in components
+- ✅ **Error Boundaries** - Implement error.tsx for graceful error handling
+- ✅ **Loading States** - Use loading.tsx and Suspense for better UX
+
+### **5. Database & Data Integrity**
+- ✅ **Drizzle ORM** - Use type-safe ORM with schema-first approach
+- ✅ **drizzle-zod Integration** - Generate Zod schemas from Drizzle for single source of truth
+- ✅ **Migrations** - Always use migrations (never push directly to production)
+- ✅ **Data Validation** - Validate at database schema level AND application level
+- ✅ **Transactions** - Use transactions for multi-step operations
+
+### **6. Code Quality & Consistency**
+- ✅ **Biome Linting** - Strict linting with consistent formatting (tabs, double quotes)
+- ✅ **Code Comments** - Write descriptive JSDoc comments for functions and complex logic
+- ✅ **Git Hooks** - Use Lefthook to enforce quality checks pre-commit
+- ✅ **Descriptive Naming** - Use clear, self-documenting variable and function names
+- ✅ **DRY Principle** - Don't repeat yourself; extract reusable logic
+
+### **7. Testing & Reliability**
+- ✅ **Test Critical Paths** - Write tests for authentication, data validation, and business logic
+- ✅ **Type Check** - Run `tsc --noEmit` to catch type errors
+- ✅ **Validate Schemas** - Test Zod schemas with valid and invalid inputs
+- ✅ **Error Handling** - Always handle errors gracefully with try-catch and user-friendly messages
+
+### **8. Performance & Optimization**
+- ✅ **React Query** - Use TanStack React Query for efficient data fetching and caching
+- ✅ **Code Splitting** - Use dynamic imports for large components
+- ✅ **Image Optimization** - Use next/image for automatic optimization
+- ✅ **Streaming** - Leverage Suspense and streaming for better perceived performance
+- ✅ **Caching Strategy** - Implement proper caching with revalidation
+
+### **9. Production Readiness**
+- ✅ **Environment Validation** - Use `@next/env` + Zod to validate env vars at startup
+- ✅ **Logging** - Implement proper error logging (console.error minimum, consider external service)
+- ✅ **Monitoring** - Set up health checks and error tracking
+- ✅ **Security Headers** - Configure proper CORS, CSP, and security headers
+- ✅ **Rate Limiting** - Implement rate limiting for API routes in production
+
+### **10. Developer Experience**
+- ✅ **Documentation** - Maintain up-to-date README with setup instructions
+- ✅ **.env.example** - Provide example environment file with all required variables
+- ✅ **Local Development** - Support local SQLite database for easy development
+- ✅ **Type-Safe Imports** - Use path aliases (@/) for cleaner imports
+- ✅ **Clear Error Messages** - Provide helpful error messages with context
 
 ## Project Overview
 This is a Next.js 16 application using React 19, Vercel AI SDK, Drizzle ORM, shadcn/ui, and Tailwind CSS v4.
@@ -16,50 +80,44 @@ This is a Next.js 16 application using React 19, Vercel AI SDK, Drizzle ORM, sha
 ## Core Technologies & Dependencies
 
 ### Framework & Runtime
-- Next.js 16.0.3 with App Router (app directory)
-- React 19.2.0 with React Server Components (RSC)
-- TypeScript 5
-- Node.js 24 LTS (current LTS version)
+- **Next.js 16+** - Latest stable with App Router and React Server Components
+- **React 19+** - Latest stable with useActionState, useFormStatus, useOptimistic
+- **TypeScript 5+** - Latest stable with strict mode enabled
+- **Node.js 24 LTS** - Current LTS version (use latest LTS available)
 
 ### UI & Styling
-- shadcn/ui (New York style) with RSC support
-- Tailwind CSS v4 with CSS variables
-- lucide-react for icons
-- class-variance-authority (cva) for component variants
-- clsx and tailwind-merge for className utilities
-- tw-animate-css for animations
+- **shadcn/ui** - Component library with New York style and RSC support
+- **Tailwind CSS v4** - Latest stable with CSS variables and modern features
+- **lucide-react** - Modern icon library (latest stable)
+- **class-variance-authority** - Type-safe component variants
+- **clsx** + **tailwind-merge** - Utility for conditional className merging
 
-### AI & ML
-- Vercel AI SDK (ai v5.0.93)
-- @ai-sdk/react v2.0.93 (use hooks like useObject, useChat, useCompletion)
-- @ai-sdk/openai v2.0.67
-- @ai-sdk/anthropic v2.0.44
-- @ai-sdk/google v2.0.32
+### AI & ML (Optional)
+- **Vercel AI SDK v5** - Streaming AI responses and structured outputs
+- **@ai-sdk/react** - React hooks (useObject, useChat, useCompletion)
+- **@ai-sdk/openai** - OpenAI provider (latest stable)
+- **@ai-sdk/anthropic** - Anthropic/Claude provider (latest stable)
+- **@ai-sdk/google** - Google AI provider (latest stable)
 
 ### Database & ORM
-- Drizzle ORM v0.44.2 with drizzle-kit v0.31.1
-- @libsql/client v0.15.8 (libSQL/Turso)
-- drizzle-zod v0.8.3 - Generate Zod schemas from Drizzle schemas (already installed)
+- **Drizzle ORM** - Type-safe ORM with schema-first approach (latest stable)
+- **drizzle-kit** - Schema management and migrations (latest stable)
+- **@libsql/client** - LibSQL/Turso database client (latest stable)
+- **drizzle-zod** - Generate Zod schemas from Drizzle schemas (latest stable)
 
-### Authentication
-- **better-auth v1.3.34** - Modern, type-safe authentication for Next.js (already installed)
-- Built-in support for email/password, OAuth, sessions, and more
-- Seamless integration with Drizzle ORM
-- Full TypeScript support with type-safe sessions
-
-### Code Quality & DevTools
-- Biome v2.3.2 for linting and formatting
-- Lefthook v2.0.4 for git hooks
-- i18next-cli for internationalization
-
-### Validation & Type Safety
-- **Zod v4** - Runtime type validation and schema definition (already installed)
-- Use for: Form validation, API input validation, environment variables
-- **@next/env** - Environment variable loading (already installed)
+### Authentication & Security
+- **better-auth v1** - Modern, type-safe authentication for Next.js (latest v1)
+- **Zod v4** - Runtime validation and schema definition (latest stable)
+- **@next/env** - Environment variable loading and validation (built-in)
 
 ### Data Fetching & State Management
-- **TanStack React Query v5** - Data fetching, caching, and server state (already installed)
-- **TanStack React Store** - Client-side state management (already installed)
+- **TanStack React Query v5** - Server state, caching, and data fetching (latest v5)
+- **TanStack React Store** - Client-side state management (latest stable)
+
+### Code Quality & Developer Tools
+- **Biome v2** - Fast linting and formatting (latest v2)
+- **Lefthook v2** - Git hooks automation (latest v2)
+- **i18next-cli** - Internationalization tools (if needed)
 
 ## Code Style & Formatting
 
