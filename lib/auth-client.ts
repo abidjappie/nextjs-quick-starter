@@ -6,15 +6,15 @@
 
 "use client";
 
-import { env } from "@/envConfig";
 import { createAuthClient } from "better-auth/react";
 
 /**
  * Auth Client Instance
  * Provides hooks for authentication in Client Components
+ * Uses NEXT_PUBLIC_ env var which is available on client
  */
 export const authClient = createAuthClient({
-	baseURL: env.NEXT_PUBLIC_APP_URL,
+	baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 });
 
 /**

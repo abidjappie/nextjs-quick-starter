@@ -2,8 +2,6 @@
 
 A modern, production-ready Next.js starter template with best practices built-in. Features Next.js 16, React 19, TypeScript, Drizzle ORM, TanStack libraries, and Vercel AI SDK.
 
-<img width="1200" alt="Next.js Starter" src="https://github.com/user-attachments/assets/b78fd54e-574b-43b9-8f8f-943d14722e64" />
-
 ## ✨ Features
 
 - ⚡️ **Next.js 16** with App Router and React Server Components
@@ -340,15 +338,12 @@ This project is open source and available under the MIT License.
 1. Check the [cursor rules](.cursorrules) for detailed guidelines
 2. Open an issue on GitHub
 3. Review the [Next.js documentation](https://nextjs.org/docs)
-4. [Join the Turso Discord](https://tur.so/discord)
 
 ## 🚀 Deploy
 
 ### Vercel (Recommended)
 
 The easiest way to deploy is with [Vercel](https://vercel.com):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
 
 Remember to:
 1. Set up environment variables in Vercel dashboard
