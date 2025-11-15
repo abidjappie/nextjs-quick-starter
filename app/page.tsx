@@ -1,15 +1,89 @@
-import { Todos } from "./todos";
+/**
+ * Home Page
+ * Server Component that fetches todos from the database
+ * Demonstrates Next.js 16 + React 19 best practices
+ */
 
+import { Suspense } from "react";
+import { db } from "@/db";
+import { todos } from "@/db/schema";
+import { desc } from "drizzle-orm";
+import { TodoForm } from "./todo-form";
+import { TodoList } from "./todo-list";
+import { UserMenu } from "@/components/user-menu";
+
+/**
+ * Fetch todos from database
+ * This runs on the server and is cached by default
+ */
+async function getTodos() {
+	try {
+		return await db.select().from(todos).orderBy(desc(todos.createdAt));
+	} catch (error) {
+		console.error("Failed to fetch todos:", error);
+		return [];
+	}
+}
+
+/**
+ * Loading skeleton for todo list
+ */
+function TodoListSkeleton() {
+	return (
+		<div className="space-y-2">
+			{[1, 2, 3].map((i) => (
+				<div
+					key={i}
+					className="h-16 bg-muted animate-pulse rounded-lg"
+					aria-label="Loading todo"
+				/>
+			))}
+		</div>
+	);
+}
+
+/**
+ * Home Page Component
+ * Server Component that fetches data and delegates interactivity to Client Components
+ */
 export default async function Page() {
-  return (
-    <div className="space-y-3">
-      <div className="pb-6 text-center">
-        <h1 className="text-3xl font-black tracking-tight text-white">Todos</h1>
-        <p className="text-white/60">
-          The todos you add below are created inside your own database.
-        </p>
-      </div>
-      <Todos />
-    </div>
-  );
+	const todoList = await getTodos();
+
+	return (
+		<main className="container mx-auto px-4 py-8 max-w-2xl">
+			{/* User Menu */}
+			<div className="mb-6 flex justify-end">
+				<UserMenu />
+			</div>
+
+			{/* Header */}
+			<div className="mb-8">
+				<h1 className="text-4xl font-bold tracking-tight mb-2">
+					Next.js Quick Starter
+				</h1>
+				<p className="text-muted-foreground">
+					Modern todo app demonstrating Next.js 16, React 19, Drizzle ORM, and
+					Zod validation
+				</p>
+			</div>
+
+			{/* Todo Form - Client Component */}
+			<div className="mb-8">
+				<TodoForm />
+			</div>
+
+			{/* Todo List - Client Component with Suspense */}
+			<Suspense fallback={<TodoListSkeleton />}>
+				<TodoList todos={todoList} />
+			</Suspense>
+
+			{/* Footer */}
+			<footer className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+				<p>
+					Built with Next.js 16, React 19, Drizzle ORM, TanStack libraries, and
+					Zod
+				</p>
+			</footer>
+		</main>
+	);
 }
