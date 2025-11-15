@@ -6,8 +6,9 @@
 
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { createTodo } from "./actions";
 
 /**
@@ -32,15 +33,27 @@ function SubmitButton() {
 /**
  * Todo Form Component
  * Uses React 19's useActionState for progressive enhancement
+ * Shows toast notifications on success/error using sonner
  */
 export function TodoForm() {
 	const [state, formAction] = useActionState(createTodo, null);
+	const formRef = useRef<HTMLFormElement>(null);
+
+	// Show toast and reset form on success
+	useEffect(() => {
+		if (state?.success) {
+			toast.success("Todo added successfully!", {
+				description: "Your todo has been added to the list.",
+			});
+			formRef.current?.reset();
+		}
+	}, [state]);
 
 	return (
 		<div className="bg-card text-card-foreground rounded-lg border p-6 shadow-sm">
 			<h2 className="text-xl font-semibold mb-4">Add New Todo</h2>
 
-			<form action={formAction} className="space-y-4">
+			<form ref={formRef} action={formAction} className="space-y-4">
 				<div>
 					<label
 						htmlFor="description"
@@ -65,9 +78,6 @@ export function TodoForm() {
 
 				<div className="flex items-center justify-between">
 					<SubmitButton />
-					{state?.success && (
-						<p className="text-green-600 text-sm">Todo added successfully!</p>
-					)}
 					{state && !state.success && state.errors?._form && (
 						<p className="text-destructive text-sm">{state.errors._form[0]}</p>
 					)}

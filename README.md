@@ -15,6 +15,8 @@ A modern, production-ready Next.js starter template with best practices built-in
 - 🔗 **drizzle-zod** for seamless schema validation
 - 🔄 **TanStack React Query** for data fetching and caching
 - 💾 **TanStack React Store** for state management
+- 🎉 **Sonner** for beautiful toast notifications
+- 📅 **date-fns** for date manipulation and formatting
 - 🤖 **Vercel AI SDK** with OpenAI, Anthropic, and Google providers
 - 🔧 **Biome** for fast linting and formatting
 - 🪝 **Lefthook** for git hooks
@@ -35,6 +37,7 @@ A modern, production-ready Next.js starter template with best practices built-in
 - **lucide-react**: Icons
 - **class-variance-authority**: Component variants
 - **tw-animate-css**: Animations
+- **sonner**: v2 for toast notifications
 
 ### Database, Auth & Validation
 - **Drizzle ORM**: v0.44.2 with drizzle-kit
@@ -45,7 +48,11 @@ A modern, production-ready Next.js starter template with best practices built-in
 
 ### Data & State Management
 - **TanStack React Query**: v5 for server state
+- **@tanstack/react-query-devtools**: DevTools for debugging queries
 - **TanStack React Store**: Client-side state management
+
+### Utilities
+- **date-fns**: v4 for date manipulation and formatting
 
 ### AI & ML
 - **Vercel AI SDK**: v5.0.93

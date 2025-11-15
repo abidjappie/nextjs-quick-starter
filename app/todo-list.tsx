@@ -7,6 +7,7 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
+import { toast } from "sonner";
 import type { Todo } from "@/db/schema";
 import { deleteTodo, toggleTodo } from "./actions";
 
@@ -91,16 +92,45 @@ export function TodoList({ todos: initialTodos }: TodoListProps) {
 	);
 
 	const handleToggle = (id: number) => {
+		const todo = optimisticTodos.find((t) => t.id === id);
 		startTransition(async () => {
 			setOptimisticTodos({ type: "toggle", id });
-			await toggleTodo(id);
+			const result = await toggleTodo(id);
+
+			if (result.success) {
+				// Show different messages based on the new state
+				if (todo?.completed) {
+					toast.info("Todo marked as incomplete", {
+						description: "Keep up the good work!",
+					});
+				} else {
+					toast.success("Todo completed!", {
+						description: "Great job! 🎉",
+					});
+				}
+			} else if (result.errors?._form) {
+				toast.error("Failed to update todo", {
+					description: result.errors._form[0],
+				});
+			}
 		});
 	};
 
 	const handleDelete = (id: number) => {
+		const todo = optimisticTodos.find((t) => t.id === id);
 		startTransition(async () => {
 			setOptimisticTodos({ type: "delete", id });
-			await deleteTodo(id);
+			const result = await deleteTodo(id);
+
+			if (result.success) {
+				toast.success("Todo deleted", {
+					description: "The todo has been removed from your list.",
+				});
+			} else if (result.errors?._form) {
+				toast.error("Failed to delete todo", {
+					description: result.errors._form[0],
+				});
+			}
 		});
 	};
 

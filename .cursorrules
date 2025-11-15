@@ -91,6 +91,7 @@ This is a Next.js 16 application using React 19, Vercel AI SDK, Drizzle ORM, sha
 - **lucide-react** - Modern icon library (latest stable)
 - **class-variance-authority** - Type-safe component variants
 - **clsx** + **tailwind-merge** - Utility for conditional className merging
+- **sonner** - Beautiful toast notifications (latest stable)
 
 ### AI & ML (Optional)
 - **Vercel AI SDK v5** - Streaming AI responses and structured outputs
@@ -112,7 +113,11 @@ This is a Next.js 16 application using React 19, Vercel AI SDK, Drizzle ORM, sha
 
 ### Data Fetching & State Management
 - **TanStack React Query v5** - Server state, caching, and data fetching (latest v5)
+- **@tanstack/react-query-devtools** - DevTools for debugging queries (latest stable)
 - **TanStack React Store** - Client-side state management (latest stable)
+
+### Utilities
+- **date-fns** - Date manipulation and formatting (latest stable)
 
 ### Code Quality & Developer Tools
 - **Biome v2** - Fast linting and formatting (latest v2)
@@ -452,6 +457,37 @@ export default async function PostsPage() {
 - Leverage React Query DevTools in development
 - Combine with Zod for response validation
 
+### React Query DevTools
+Enable DevTools for debugging queries in development:
+
+```typescript
+// app/providers.tsx
+"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useState } from "react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+}
+```
+
+**DevTools Features:**
+- View all queries and their states
+- Inspect query data and cache
+- Manually trigger refetch or invalidation
+- Monitor network requests
+- Debug stale/fresh data
+- Only included in development builds (tree-shaken in production)
+
 ## TanStack React Store Best Practices
 
 ### Setup React Store
@@ -560,6 +596,156 @@ export function ContactForm() {
 - **React Store**: UI state, form state, client-side only state
 - **Server Actions**: Form submissions, mutations with progressive enhancement
 - **useState**: Local component state that doesn't need to be shared
+
+## Sonner Toast Notifications
+
+### Setup
+Add Toaster component to root layout:
+
+```typescript
+// app/layout.tsx
+import { Toaster } from "sonner";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <Toaster position="bottom-right" richColors />
+      </body>
+    </html>
+  );
+}
+```
+
+### Usage Patterns
+
+**Basic toast notifications:**
+```typescript
+"use client";
+
+import { toast } from "sonner";
+
+export function MyComponent() {
+  return (
+    <div>
+      <button onClick={() => toast.success("Success!")}>Show toast</button>
+      <button onClick={() => toast.error("Error occurred")}>Error</button>
+      <button onClick={() => toast.info("Information")}>Info</button>
+      <button onClick={() => toast.warning("Warning")}>Warning</button>
+    </div>
+  );
+}
+```
+
+**Toast with description:**
+```typescript
+toast.success("Todo added successfully!", {
+  description: "Your todo has been added to the list.",
+});
+```
+
+**Toast with action button:**
+```typescript
+toast.success("Todo deleted", {
+  description: "The todo has been removed.",
+  action: {
+    label: "Undo",
+    onClick: () => console.log("Undo"),
+  },
+});
+```
+
+**Promise toast (for async operations):**
+```typescript
+toast.promise(
+  fetch("/api/data"),
+  {
+    loading: "Loading...",
+    success: "Data loaded successfully!",
+    error: "Failed to load data",
+  }
+);
+```
+
+### Sonner Best Practices
+- Use in Client Components only (requires "use client")
+- Use appropriate toast types (success, error, info, warning)
+- Add descriptions for important actions
+- Use promise toasts for async operations
+- Keep messages concise and actionable
+- Use action buttons for undo operations
+- Position: bottom-right is recommended for non-intrusive UX
+
+## date-fns Utility
+
+### Common Date Operations
+
+**Formatting dates:**
+```typescript
+import { format, formatDistance, formatRelative } from "date-fns";
+
+// Format date
+format(new Date(), "PPP"); // "April 29, 2023"
+format(new Date(), "yyyy-MM-dd"); // "2023-04-29"
+format(new Date(), "MMMM do, yyyy"); // "April 29th, 2023"
+
+// Relative time
+formatDistance(new Date(2023, 0, 1), new Date()); // "4 months ago"
+formatRelative(new Date(2023, 0, 1), new Date()); // "01/01/2023"
+```
+
+**Date manipulation:**
+```typescript
+import { addDays, subDays, addMonths, startOfMonth, endOfMonth } from "date-fns";
+
+// Add/subtract time
+addDays(new Date(), 7); // 7 days from now
+subDays(new Date(), 7); // 7 days ago
+addMonths(new Date(), 1); // 1 month from now
+
+// Start/end of periods
+startOfMonth(new Date()); // First day of current month
+endOfMonth(new Date()); // Last day of current month
+```
+
+**Date comparisons:**
+```typescript
+import { isBefore, isAfter, isSameDay, isWithinInterval } from "date-fns";
+
+const date1 = new Date(2023, 0, 1);
+const date2 = new Date(2023, 6, 1);
+
+isBefore(date1, date2); // true
+isAfter(date1, date2); // false
+isSameDay(date1, date2); // false
+
+isWithinInterval(new Date(), {
+  start: date1,
+  end: date2,
+}); // Check if current date is between date1 and date2
+```
+
+**Parsing dates:**
+```typescript
+import { parse, parseISO } from "date-fns";
+
+// Parse ISO string
+parseISO("2023-04-29T10:30:00Z");
+
+// Parse custom format
+parse("29/04/2023", "dd/MM/yyyy", new Date());
+```
+
+### date-fns Best Practices
+- Always use date-fns for date operations (avoid native Date methods)
+- Use `formatDistance` for relative times ("2 hours ago")
+- Use `format` with standard tokens for consistency
+- Consider locale support with `date-fns/locale`
+- Tree-shakable: only import functions you need
+- Immutable: functions don't modify original dates
+- Use `parseISO` for ISO 8601 strings from APIs
+- Validate dates with `isValid` before operations
 
 ### Environment Variables (with @next/env and Zod Validation)
 - Use `@next/env` to load environment variables (already installed)
@@ -1707,22 +1893,15 @@ export async function createPost(input: CreatePostInput) {
 ### Recommended Additional Packages
 
 **Already Installed:**
-- ✅ **TanStack React Query** - Data fetching and caching
-- ✅ **TanStack React Store** - State management
-- ✅ **Zod** - Runtime validation
-- ✅ **drizzle-zod** - Generate Zod schemas from Drizzle schemas
+- ✅ **sonner** - Beautiful toast notifications
+- ✅ **date-fns** - Date manipulation and formatting
+- ✅ **@tanstack/react-query-devtools** - DevTools for debugging queries
 
 **Consider adding with pnpm:**
-- **@tanstack/react-query-devtools**: React Query DevTools for debugging
 - **react-hook-form** + **@hookform/resolvers**: Complex form handling with Zod validation
-- **@upstash/ratelimit**: Rate limiting for API routes
-- **sonner**: Beautiful toast notifications
 - **nuqs**: Type-safe URL search params
-- **date-fns**: Date manipulation and formatting
 - **vaul**: Drawer component (mobile-friendly)
 - **zod-form-data**: Parse FormData directly with Zod schemas
-
-Installation example: `pnpm add @tanstack/react-query-devtools`
 
 Example with react-hook-form + Zod:
 ```typescript
