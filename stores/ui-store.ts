@@ -121,4 +121,3 @@ export function setLoading(isLoading: boolean) {
 export function resetUIState() {
 	uiStore.setState(initialState);
 }
-

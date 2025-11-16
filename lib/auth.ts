@@ -5,9 +5,9 @@
 
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import * as schema from "@/auth-schema";
 import { db } from "@/db";
 import { env } from "@/envConfig";
-import * as schema from "@/auth-schema";
 
 /**
  * Better Auth Instance
@@ -47,4 +47,3 @@ export const auth = betterAuth({
  */
 export type Session = typeof auth.$Infer.Session;
 export type User = typeof auth.$Infer.Session.user;
-

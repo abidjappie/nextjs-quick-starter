@@ -4,13 +4,13 @@
  * Demonstrates Next.js 16 + React 19 best practices
  */
 
+import { desc } from "drizzle-orm";
 import { Suspense } from "react";
+import { TodoForm } from "@/components/todo-form";
+import { TodoList } from "@/components/todo-list";
+import { UserMenu } from "@/components/user-menu";
 import { db } from "@/db";
 import { todos } from "@/db/schema";
-import { desc } from "drizzle-orm";
-import { TodoForm } from "./todo-form";
-import { TodoList } from "./todo-list";
-import { UserMenu } from "@/components/user-menu";
 
 /**
  * Fetch todos from database
@@ -30,13 +30,10 @@ async function getTodos() {
  */
 function TodoListSkeleton() {
 	return (
-		<div className="space-y-2">
+		<div className="space-y-2" aria-busy="true">
+			<span className="sr-only">Loading todos...</span>
 			{[1, 2, 3].map((i) => (
-				<div
-					key={i}
-					className="h-16 bg-muted animate-pulse rounded-lg"
-					aria-label="Loading todo"
-				/>
+				<div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />
 			))}
 		</div>
 	);

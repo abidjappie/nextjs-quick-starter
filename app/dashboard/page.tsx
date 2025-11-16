@@ -4,10 +4,10 @@
  * Demonstrates session access in Server Components
  */
 
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 /**
  * Dashboard Page Component
@@ -89,11 +89,13 @@ export default async function DashboardPage() {
 
 			{/* Back Link */}
 			<div className="mt-6 text-center">
-				<Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+				<Link
+					href="/"
+					className="text-sm text-muted-foreground hover:text-foreground"
+				>
 					← Back to home
 				</Link>
 			</div>
 		</div>
 	);
 }
-

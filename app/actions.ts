@@ -5,16 +5,10 @@
 
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import {
-	type CreateTodoForm,
-	type UpdateTodo,
-	createTodoFormSchema,
-	todos,
-	updateTodoSchema,
-} from "@/db/schema";
+import { createTodoFormSchema, todos, updateTodoSchema } from "@/db/schema";
 
 /**
  * Action result type for consistent error handling

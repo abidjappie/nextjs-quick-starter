@@ -6,10 +6,10 @@
 
 "use client";
 
-import { signIn } from "@/lib/auth-client";
-import { useState, useActionState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { signIn } from "@/lib/auth-client";
 
 /**
  * Login Page Component
@@ -50,7 +50,7 @@ export default function LoginPage() {
 					},
 				},
 			);
-		} catch (err) {
+		} catch (_err) {
 			setError("An unexpected error occurred. Please try again.");
 		} finally {
 			setLoading(false);
@@ -75,10 +75,7 @@ export default function LoginPage() {
 					<form onSubmit={handleSubmit} className="space-y-4">
 						{/* Email Field */}
 						<div>
-							<label
-								htmlFor="email"
-								className="block text-sm font-medium mb-2"
-							>
+							<label htmlFor="email" className="block text-sm font-medium mb-2">
 								Email
 							</label>
 							<input
@@ -166,4 +163,3 @@ export default function LoginPage() {
 		</div>
 	);
 }
-

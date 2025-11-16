@@ -6,10 +6,11 @@
 
 "use client";
 
+import { formatDistance } from "date-fns";
 import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
+import { deleteTodo, toggleTodo } from "@/app/actions";
 import type { Todo } from "@/db/schema";
-import { deleteTodo, toggleTodo } from "./actions";
 
 interface TodoListProps {
 	todos: Todo[];
@@ -52,11 +53,14 @@ function TodoItem({
 
 			{/* Created date */}
 			<span className="text-xs text-muted-foreground">
-				{new Date(todo.createdAt).toLocaleDateString()}
+				{formatDistance(new Date(todo.createdAt), new Date(), {
+					addSuffix: true,
+				})}
 			</span>
 
 			{/* Delete button */}
 			<button
+				type="button"
 				onClick={() => onDelete(todo.id)}
 				className="opacity-0 group-hover:opacity-100 px-3 py-1 text-sm text-destructive hover:bg-destructive/10 rounded transition-all"
 				aria-label={`Delete "${todo.description}"`}
@@ -117,7 +121,7 @@ export function TodoList({ todos: initialTodos }: TodoListProps) {
 	};
 
 	const handleDelete = (id: number) => {
-		const todo = optimisticTodos.find((t) => t.id === id);
+		const _todo = optimisticTodos.find((t) => t.id === id);
 		startTransition(async () => {
 			setOptimisticTodos({ type: "delete", id });
 			const result = await deleteTodo(id);
@@ -198,4 +202,3 @@ export function TodoList({ todos: initialTodos }: TodoListProps) {
 		</div>
 	);
 }
-

@@ -9,7 +9,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { createTodo } from "./actions";
+import { createTodo } from "@/app/actions";
 
 /**
  * Submit Button
@@ -86,4 +86,3 @@ export function TodoForm() {
 		</div>
 	);
 }
-

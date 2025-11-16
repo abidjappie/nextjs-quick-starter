@@ -6,10 +6,10 @@
 
 "use client";
 
-import { signUp } from "@/lib/auth-client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { signUp } from "@/lib/auth-client";
 
 /**
  * Register Page Component
@@ -68,7 +68,7 @@ export default function RegisterPage() {
 					},
 				},
 			);
-		} catch (err) {
+		} catch (_err) {
 			setError("An unexpected error occurred. Please try again.");
 		} finally {
 			setLoading(false);
@@ -110,10 +110,7 @@ export default function RegisterPage() {
 
 						{/* Email Field */}
 						<div>
-							<label
-								htmlFor="email"
-								className="block text-sm font-medium mb-2"
-							>
+							<label htmlFor="email" className="block text-sm font-medium mb-2">
 								Email
 							</label>
 							<input
@@ -226,4 +223,3 @@ export default function RegisterPage() {
 		</div>
 	);
 }
-

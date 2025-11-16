@@ -29,7 +29,9 @@ const authRoutes: string[] = ["/login", "/register"];
  * @param request - The incoming Next.js request
  * @returns NextResponse with redirect or next()
  */
-export default async function proxy(request: NextRequest): Promise<NextResponse> {
+export default async function proxy(
+	request: NextRequest,
+): Promise<NextResponse> {
 	const pathname = request.nextUrl.pathname;
 
 	// Check if the current route is protected or an auth route
