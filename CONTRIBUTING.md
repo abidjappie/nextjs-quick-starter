@@ -29,30 +29,6 @@ Thank you for your interest in contributing! This document provides guidelines a
 - **TypeScript**: Enable strict mode, avoid `any` types
 - **Comments**: Write clear JSDoc comments for functions
 
-### Best Practices
-
-1. **Validation**: Always use Zod for input validation
-2. **Database**: Use drizzle-zod to generate Zod schemas from Drizzle schemas
-3. **Data Fetching**: Use TanStack React Query for server state
-4. **State Management**: Use TanStack React Store for UI state
-5. **Components**: Default to Server Components, use `"use client"` only when needed
-6. **Forms**: Use React 19's useActionState with Server Actions
-
-### Project Structure
-
-```
-app/              # Next.js App Router
-  actions.ts      # Server actions
-  layout.tsx      # Root layout
-  page.tsx        # Pages
-components/       # React components
-  ui/            # shadcn/ui components
-db/              # Database
-  schema.ts      # Drizzle schema with Zod schemas
-lib/             # Utility functions
-stores/          # React Store stores
-```
-
 ## 🧪 Testing
 
 - Write unit tests for utility functions
@@ -85,7 +61,6 @@ Your PR will be reviewed for:
 
 - Code quality and style (Biome checks)
 - TypeScript type safety
-- Proper use of Zod validation
 - Following project conventions
 - Clear and descriptive commit messages
 - Documentation updates if needed
@@ -108,15 +83,6 @@ We welcome feature requests! Please:
 - Describe the feature and its benefits
 - Provide examples or use cases
 - Consider implementation details
-
-## 📚 Resources
-
-- [Cursor Rules](.cursorrules) - Detailed project guidelines
-- [Next.js Docs](https://nextjs.org/docs)
-- [React 19 Docs](https://react.dev)
-- [Drizzle ORM Docs](https://orm.drizzle.team)
-- [TanStack Query Docs](https://tanstack.com/query/latest)
-- [Zod Docs](https://zod.dev)
 
 ## 🙏 Thank You
 

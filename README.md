@@ -1,6 +1,6 @@
 # Next.js Quick Starter
 
-A modern, production-ready Next.js starter template with best practices built-in. Features Next.js 16, React 19, TypeScript, Drizzle ORM, TanStack libraries, and Vercel AI SDK.
+A modern Next.js starter template with best practices built-in. Features Next.js 16, React 19, TypeScript, Drizzle ORM, TanStack libraries, and Vercel AI SDK.
 
 ## ✨ Features
 
@@ -25,8 +25,8 @@ A modern, production-ready Next.js starter template with best practices built-in
 ## 🚀 Stack
 
 ### Core
-- **Framework**: Next.js 16.0.3 with App Router
-- **React**: 19.2.0 with Server Components
+- **Framework**: Next.js 16 with App Router
+- **React**: 19 with Server Components
 - **TypeScript**: 5
 - **Node.js**: 24 LTS (recommended)
 - **Package Manager**: pnpm (required)
@@ -40,9 +40,9 @@ A modern, production-ready Next.js starter template with best practices built-in
 - **sonner**: v2 for toast notifications
 
 ### Database, Auth & Validation
-- **Drizzle ORM**: v0.44.2 with drizzle-kit
+- **Drizzle ORM**: with drizzle-kit
 - **libSQL**: @libsql/client for Turso database
-- **better-auth**: v1.3.34 for authentication
+- **better-auth**: v1.3 for authentication
 - **Zod**: v4 for runtime validation
 - **drizzle-zod**: Auto-generate Zod schemas from Drizzle
 
@@ -55,14 +55,14 @@ A modern, production-ready Next.js starter template with best practices built-in
 - **date-fns**: v4 for date manipulation and formatting
 
 ### AI & ML
-- **Vercel AI SDK**: v5.0.93
+- **Vercel AI SDK**: v5
 - **@ai-sdk/react**: React hooks (useObject, useChat, etc.)
 - **@ai-sdk/openai**: OpenAI provider
 - **@ai-sdk/anthropic**: Anthropic provider
 - **@ai-sdk/google**: Google AI provider
 
 ### Code Quality
-- **Biome**: v2.3.2 for linting and formatting
+- **Biome**: v2 for linting and formatting
 - **Lefthook**: Git hooks automation
 
 ## 📋 Prerequisites
