@@ -28,6 +28,20 @@ const envSchema = z.object({
 	// GOOGLE_CLIENT_ID: z.string().min(1).optional(),
 	// GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 
+	// Custom OAuth IDP Configuration
+	OAUTH_IDP_ENABLED: z
+		.string()
+		.optional()
+		.default("false")
+		.transform((val) => val === "true"),
+	OAUTH_IDP_NAME: z.string().optional().default("Custom IDP"), // Display name for the IDP
+	OAUTH_IDP_CLIENT_ID: z.string().optional(),
+	OAUTH_IDP_CLIENT_SECRET: z.string().optional(),
+	OAUTH_IDP_AUTHORIZATION_ENDPOINT: z.string().url().optional(), // e.g., https://idp.example.com/oauth/authorize
+	OAUTH_IDP_TOKEN_ENDPOINT: z.string().url().optional(), // e.g., https://idp.example.com/oauth/token
+	OAUTH_IDP_USERINFO_ENDPOINT: z.string().url().optional(), // e.g., https://idp.example.com/oauth/userinfo
+	OAUTH_IDP_SCOPES: z.string().optional().default("openid profile email"), // Space-separated scopes
+
 	// Application configuration
 	NODE_ENV: z
 		.enum(["development", "production", "test"])
@@ -35,6 +49,12 @@ const envSchema = z.object({
 
 	// Client-safe variables (NEXT_PUBLIC_ prefix)
 	NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
+	NEXT_PUBLIC_OAUTH_IDP_ENABLED: z
+		.string()
+		.optional()
+		.default("false")
+		.transform((val) => val === "true"),
+	NEXT_PUBLIC_OAUTH_IDP_NAME: z.string().optional().default("Custom IDP"),
 });
 
 // Validate environment variables at startup
