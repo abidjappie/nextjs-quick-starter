@@ -7,6 +7,7 @@ This project uses **better-auth** for modern, type-safe authentication. This gui
 - [Overview](#overview)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
+- [Global Admin System](#global-admin-system)
 - [Usage Patterns](#usage-patterns)
 - [Protecting Routes](#protecting-routes)
 - [Best Practices](#best-practices)
@@ -74,6 +75,52 @@ Auth endpoints are available at:
 - `/api/auth/signup`
 - `/api/auth/signout`
 - And more...
+
+## Global Admin System
+
+The application includes a global admin system for managing OAuth providers and system configuration.
+
+### Setting Up Global Admin
+
+1. **Configure environment variables** in `.env.local`:
+
+\`\`\`bash
+GLOBAL_ADMIN_EMAIL="admin@example.com"
+GLOBAL_ADMIN_PASSWORD="your-secure-password"
+\`\`\`
+
+2. **Seed the global admin user**:
+
+\`\`\`bash
+pnpm db:seed
+\`\`\`
+
+This creates a user with:
+- Email: The configured `GLOBAL_ADMIN_EMAIL`
+- Password: The configured `GLOBAL_ADMIN_PASSWORD`
+- `isGlobalAdmin`: true (special admin flag)
+
+### Accessing the System Panel
+
+Global admins can access the `/system` admin panel:
+
+1. Sign in with the global admin credentials
+2. Navigate to `http://localhost:3000/system`
+3. Manage OAuth providers and system configuration
+
+### Security
+
+- Only users with `isGlobalAdmin = true` can access `/system`
+- Protected by proxy middleware at the route level
+- All server actions verify global admin status
+- Change the default password immediately in production
+
+### Verifying Admin Status
+
+\`\`\`bash
+# Check global admin users in database
+sqlite3 local.db "SELECT email, is_global_admin FROM user WHERE is_global_admin = 1;"
+\`\`\`
 
 ## Configuration
 

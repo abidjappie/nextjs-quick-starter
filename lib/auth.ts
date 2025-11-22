@@ -1,19 +1,53 @@
 /**
  * Better Auth Configuration
  * Authentication setup using better-auth with Drizzle ORM
+ * Dynamically loads OAuth providers from database
  */
 
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 import * as schema from "@/auth-schema";
 import { db } from "@/db";
+import { oauthProviders } from "@/db/schema";
 import { env } from "@/envConfig";
+
+/**
+ * Load OAuth providers from database
+ * Returns array of provider configurations for better-auth
+ */
+async function loadOAuthProvidersFromDB() {
+	try {
+		const providers = await db
+			.select()
+			.from(oauthProviders)
+			.where(eq(oauthProviders.enabled, true));
+
+		return providers.map((p) => ({
+			providerId: p.providerId,
+			clientId: p.clientId,
+			clientSecret: p.clientSecret,
+			authorizationUrl: p.authorizationUrl,
+			tokenUrl: p.tokenUrl,
+			userInfoUrl: p.userInfoUrl || undefined,
+			scopes: p.scopes.split(" "),
+			pkce: true,
+			redirectURI: `${env.NEXT_PUBLIC_APP_URL}/api/auth/callback/${p.providerId}`,
+		}));
+	} catch (error) {
+		console.error("Error loading OAuth providers from database:", error);
+		return [];
+	}
+}
+
+// Load OAuth providers from database (top-level await supported in Node 24+)
+const allOAuthProviders = await loadOAuthProvidersFromDB();
 
 /**
  * Better Auth Instance
  * Configured with Drizzle adapter for database operations
- * With custom OAuth IDP support via genericOAuth plugin
+ * Dynamically loads OAuth providers from database
  */
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
@@ -24,55 +58,56 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: false, // Set to true in production
 	},
-	// Optional: Built-in social providers
-	// socialProviders: {
-	//   github: {
-	//     clientId: env.GITHUB_CLIENT_ID || "",
-	//     clientSecret: env.GITHUB_CLIENT_SECRET || "",
-	//   },
-	//   google: {
-	//     clientId: env.GOOGLE_CLIENT_ID || "",
-	//     clientSecret: env.GOOGLE_CLIENT_SECRET || "",
-	//   },
-	// },
 	plugins: [
-		// Custom OAuth IDP Configuration
-		...(env.OAUTH_IDP_ENABLED &&
-		env.OAUTH_IDP_CLIENT_ID &&
-		env.OAUTH_IDP_CLIENT_SECRET &&
-		env.OAUTH_IDP_AUTHORIZATION_ENDPOINT &&
-		env.OAUTH_IDP_TOKEN_ENDPOINT
-			? [
-					genericOAuth({
-						config: [
-							{
-								providerId: "custom-idp",
-								discoveryUrl: env.OAUTH_IDP_USERINFO_ENDPOINT
-									? undefined
-									: `${env.OAUTH_IDP_AUTHORIZATION_ENDPOINT.split("/oauth")[0]}/.well-known/openid-configuration`,
-								clientId: env.OAUTH_IDP_CLIENT_ID,
-								clientSecret: env.OAUTH_IDP_CLIENT_SECRET,
-								authorizationUrl: env.OAUTH_IDP_AUTHORIZATION_ENDPOINT,
-								tokenUrl: env.OAUTH_IDP_TOKEN_ENDPOINT,
-								userInfoUrl: env.OAUTH_IDP_USERINFO_ENDPOINT,
-								scopes: env.OAUTH_IDP_SCOPES.split(" "),
-								redirectURI: `${env.NEXT_PUBLIC_APP_URL}/api/auth/callback/custom-idp`,
-								// Map the user info response to better-auth user format
-								pkce: true, // Use PKCE for enhanced security
-							},
-						],
-					}),
-				]
+		// Load OAuth providers dynamically from database
+		...(allOAuthProviders.length > 0
+			? [genericOAuth({ config: allOAuthProviders })]
 			: []),
 	],
 	session: {
 		expiresIn: 60 * 60 * 24 * 7, // 7 days
 		updateAge: 60 * 60 * 24, // 1 day
 	},
+	user: {
+		additionalFields: {
+			isGlobalAdmin: {
+				type: "boolean",
+				default: false,
+				required: false,
+			},
+		},
+	},
 	basePath: "/api/auth",
 	baseURL: env.NEXT_PUBLIC_APP_URL,
 	secret: env.BETTER_AUTH_SECRET,
 });
+
+/**
+ * Get enabled OAuth providers from database
+ * Use this function to display available providers in the login UI
+ */
+export async function getEnabledOAuthProviders() {
+	try {
+		return await db
+			.select()
+			.from(oauthProviders)
+			.where(eq(oauthProviders.enabled, true));
+	} catch (error) {
+		console.error("Error fetching OAuth providers:", error);
+		return [];
+	}
+}
+
+/**
+ * Note on Hot Reload:
+ * Since better-auth config is created at module load time (top-level await),
+ * changes to OAuth providers in the database require an application restart
+ * to take effect. This is the recommended approach from better-auth.
+ *
+ * For immediate effect without restart, consider implementing a custom OAuth
+ * handler that checks the database on each request, but this is more complex
+ * and not covered in the standard better-auth pattern.
+ */
 
 /**
  * Export auth types for type safety
