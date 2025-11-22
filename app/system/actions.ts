@@ -216,12 +216,9 @@ export async function updateOAuthProvider(formData: FormData) {
 
 		if (error instanceof Error) {
 			// Handle Zod validation errors
-			if ("issues" in error) {
-				const zodError = error as {
-					issues: Array<{ path: string[]; message: string }>;
-				};
+			if (error instanceof ZodError) {
 				const errors: Record<string, string[]> = {};
-				for (const issue of zodError.issues) {
+				for (const issue of error.issues) {
 					const field = issue.path[0] as string;
 					if (!errors[field]) {
 						errors[field] = [];

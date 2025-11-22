@@ -7,10 +7,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQueryState } from "nuqs";
 import { useState } from "react";
 import type { ClientSafeOAuthProvider } from "@/db/schema";
 import { signIn } from "@/lib/auth-client";
+import { useSafeCallbackUrl } from "@/lib/use-safe-callback-url";
 
 interface LoginFormProps {
 	oauthProviders: ClientSafeOAuthProvider[];
@@ -20,7 +20,7 @@ export function LoginForm({ oauthProviders }: LoginFormProps) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const [callbackUrl] = useQueryState("callbackUrl", { defaultValue: "/" });
+	const callbackUrl = useSafeCallbackUrl("/");
 
 	/**
 	 * Handle form submission

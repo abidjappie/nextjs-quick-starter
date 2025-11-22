@@ -105,7 +105,7 @@ GLOBAL_ADMIN_PASSWORD="YourSecure123!Pass"  # Min 12 chars, 1 uppercase, 1 lower
 
 # Encryption Key (required for encrypting OAuth client secrets)
 # Generate with: openssl rand -hex 32
-ENCRYPTION_KEY="$(openssl rand -hex 32)"  # MUST be exactly 64 hex characters (32 bytes)
+ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"  # MUST be exactly 64 hex characters (32 bytes)
 
 # AI Providers (at least one recommended for AI features)
 OPENAI_API_KEY="sk-..."
@@ -471,16 +471,16 @@ export function ProductFilters() {
 ```typescript
 "use client";
 
-import { useQueryState } from "nuqs";
+import { useSafeCallbackUrl } from "@/lib/use-safe-callback-url";
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
-  const [callbackUrl] = useQueryState("callbackUrl", { defaultValue: "/" });
+  const callbackUrl = useSafeCallbackUrl("/");
   const router = useRouter();
   
   async function handleLogin() {
     // ... authentication logic
-    router.push(callbackUrl); // Redirect to callback URL
+    router.push(callbackUrl); // Redirect to safe callback URL
   }
   
   return <form onSubmit={handleLogin}>...</form>;

@@ -60,7 +60,7 @@ export async function encrypt(plaintext: string): Promise<string> {
 	combined.set(new Uint8Array(ciphertext), IV_LENGTH);
 
 	// Convert to base64 (Node.js or browser compatible)
-	return Buffer !== undefined
+	return typeof Buffer !== "undefined"
 		? Buffer.from(combined).toString("base64")
 		: btoa(String.fromCharCode(...combined));
 }
@@ -77,7 +77,7 @@ export async function decrypt(encryptedData: string): Promise<string> {
 
 	// Decode base64 to bytes (Node.js or browser compatible)
 	const combined =
-		Buffer !== undefined
+		typeof Buffer !== "undefined"
 			? new Uint8Array(Buffer.from(encryptedData, "base64"))
 			: new Uint8Array(
 					atob(encryptedData)
