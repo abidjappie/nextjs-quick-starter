@@ -94,11 +94,12 @@ export const config = {
 		/*
 		 * Match all request paths except for:
 		 * - api/auth (better-auth endpoints)
+		 * - .well-known/workflow (Workflow DevKit internal paths)
 		 * - _next/static (static files)
 		 * - _next/image (image optimization)
 		 * - favicon.ico (favicon file)
 		 * - public files (public folder)
 		 */
-		"/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+		"/((?!api/auth|\\.well-known/workflow|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
 	],
 };

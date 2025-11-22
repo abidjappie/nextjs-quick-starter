@@ -45,4 +45,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# database
 local.db
+*.db
+*.db-shm
+*.db-wal
+
+# workflow devkit
+.workflow/
+workflow-data/
+*.workflow.db
+*.workflow.db-shm
+*.workflow.db-wal

@@ -8,6 +8,7 @@ A modern Next.js starter template with best practices built-in. Features Next.js
 - ⚛️ **React 19** with latest features (useActionState, useFormStatus, useOptimistic)
 - 📝 **TypeScript** with strict mode
 - 🔐 **better-auth** for modern authentication (email/password, OAuth, sessions)
+- 🔄 **Workflow DevKit** for durable, long-running workflows with auto-retry
 - 🎨 **Tailwind CSS v4** with CSS variables
 - 🧩 **shadcn/ui** (New York style) for beautiful components
 - 🗄️ **Drizzle ORM** with libSQL/Turso database
@@ -22,6 +23,10 @@ A modern Next.js starter template with best practices built-in. Features Next.js
 - 🔧 **Biome** for fast linting and formatting
 - 🪝 **Lefthook** for git hooks
 - 🌍 **i18next** for internationalization
+
+### 💡 Recommended for Production
+
+- **Vercel KV** (Redis) - For rate limiting, caching, and distributed state management
 
 ## 🚀 Stack
 
@@ -317,6 +322,154 @@ pnpm db:generate
 pnpm db:migrate
 ```
 
+### Add Rate Limiting (Recommended for Production)
+
+Implement rate limiting using **Vercel KV** (Redis) to protect your API routes, server actions, and workflows:
+
+**Use Cases:**
+- 🤖 **AI API calls** - Prevent hitting provider rate limits
+- 🔐 **Authentication** - Protect login/signup endpoints from brute force
+- 📧 **Email sending** - Limit emails per user/hour
+- 🔄 **API routes** - Prevent abuse and DDoS attacks
+- 💾 **Database operations** - Control expensive queries
+- 🎯 **User actions** - Implement per-user quotas
+
+**Why Vercel KV:**
+- ✅ Distributed rate limiting across all serverless instances
+- ✅ Real-time tracking across all deployments
+- ✅ Automatic expiration of rate limit windows
+- ✅ Built-in atomic operations for accuracy
+- ✅ Seamless Vercel deployment integration
+- ✅ Included in Vercel plans (no extra service)
+
+**Installation:**
+
+```bash
+pnpm add @vercel/kv
+```
+
+**Setup:**
+
+Follow the [official Vercel KV quickstart guide](https://vercel.com/docs/storage/vercel-kv/quickstart):
+
+1. Create a KV database in your [Vercel dashboard](https://vercel.com/dashboard/stores)
+2. Go to **Storage** → **Create Database** → Choose **KV**
+3. Link to your project:
+   ```bash
+   vercel link
+   vercel env pull .env.local
+   ```
+
+This automatically adds the required environment variables (`KV_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `KV_REST_API_READ_ONLY_TOKEN`).
+
+**Example Rate Limiter:**
+
+Based on [Vercel's official examples](https://vercel.com/docs/storage/vercel-kv):
+
+```typescript
+// lib/rate-limit.ts
+import { kv } from "@vercel/kv";
+
+/**
+ * Simple sliding window rate limiter using Vercel KV
+ * Based on Vercel's official documentation
+ * @see https://vercel.com/docs/storage/vercel-kv
+ */
+export async function rateLimit(
+  identifier: string,
+  limit: number = 10,
+  windowSeconds: number = 3600
+): Promise<{ allowed: boolean; remaining: number }> {
+  const key = `ratelimit:${identifier}`;
+  const current = await kv.incr(key);
+  
+  // Set expiration on first request
+  if (current === 1) {
+    await kv.expire(key, windowSeconds);
+  }
+  
+  const allowed = current <= limit;
+  const remaining = Math.max(0, limit - current);
+  
+  return { allowed, remaining };
+}
+```
+
+**Use in API Routes:**
+
+```typescript
+// app/api/protected/route.ts
+import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
+
+export async function POST(request: Request) {
+  const userId = request.headers.get("x-user-id") || "anonymous";
+  
+  // Limit to 10 requests per hour
+  const { allowed, remaining } = await rateLimit(`api:${userId}`, 10, 3600);
+  
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Try again later." },
+      { status: 429 }
+    );
+  }
+  
+  // Process request...
+  return NextResponse.json({ 
+    success: true,
+    rateLimit: { remaining }
+  });
+}
+```
+
+**Use in Server Actions:**
+
+```typescript
+// app/actions.ts
+"use server";
+
+import { rateLimit } from "@/lib/rate-limit";
+
+export async function sendEmail(email: string) {
+  // Limit emails to 5 per hour per email address
+  const { allowed } = await rateLimit(`email:${email}`, 5, 3600);
+  
+  if (!allowed) {
+    return { error: "Too many emails sent. Try again later." };
+  }
+  
+  // Send email...
+}
+```
+
+**Use in Workflows:**
+
+```typescript
+// workflows/ai-content.ts
+import { FatalError } from "workflow";
+import { rateLimit } from "@/lib/rate-limit";
+
+async function checkRateLimitStep(userId: string) {
+  "use step";
+  
+  const { allowed, remaining } = await rateLimit(`ai:${userId}`, 10, 3600);
+  
+  if (!allowed) {
+    throw new FatalError("Rate limit exceeded. Try again in 1 hour.");
+  }
+  
+  console.log(`${remaining} AI requests remaining`);
+}
+```
+
+**Official Resources:**
+- [Vercel KV Documentation](https://vercel.com/docs/storage/vercel-kv)
+- [Vercel KV Quickstart](https://vercel.com/docs/storage/vercel-kv/quickstart)
+- [Vercel KV SDK Reference](https://vercel.com/docs/storage/vercel-kv/kv-reference)
+- [Next.js Redis Session Store Guide](https://vercel.com/guides/session-store-nextjs-redis-vercel-kv)
+- [Redis Next.js Starter Template](https://vercel.com/templates/next.js/kv-redis-starter)
+
 ### Add React Query to a component
 
 ```typescript
@@ -540,10 +693,17 @@ const envSchema = z.object({
 
 ## 📚 Documentation
 
+### Project Guides
 - **[AUTHENTICATION.md](./AUTHENTICATION.md)** - Complete authentication guide with better-auth
-- **[OAUTH_SETUP.md](./OAUTH_SETUP.md)** - OAuth provider management and setup
+- **[OAUTH_SETUP.md](./OAUTH_SETUP.md)** - Configure custom OAuth/OIDC providers
+- **[WORKFLOW.md](./WORKFLOW.md)** - Build durable workflows with automatic retries
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Guidelines for contributing
+- **[CHEATSHEET.md](./CHEATSHEET.md)** - Quick reference guide
+
+### Framework Documentation
 - [Next.js 16 Docs](https://nextjs.org/docs)
 - [React 19 Docs](https://react.dev)
+- [Workflow DevKit Docs](https://useworkflow.dev/docs)
 - [Drizzle ORM Docs](https://orm.drizzle.team)
 - [TanStack Query Docs](https://tanstack.com/query/latest)
 - [Vercel AI SDK Docs](https://sdk.vercel.ai)

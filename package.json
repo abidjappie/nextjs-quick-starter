@@ -19,7 +19,8 @@
 		"db:push": "drizzle-kit push",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"db:seed": "tsx db/seed.ts"
+		"db:seed": "tsx db/seed.ts",
+		"workflow:inspect": "pnpm dlx workflow inspect runs --web"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^2.0.44",
@@ -49,6 +50,7 @@
 		"react-dom": "19.2.0",
 		"sonner": "^2.0.7",
 		"tailwind-merge": "^3.4.0",
+		"workflow": "4.0.1-beta.18",
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {
