@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { signUp } from "@/lib/auth-client";
 
@@ -19,6 +20,7 @@ export default function RegisterPage() {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
+	const [callbackUrl] = useQueryState("callbackUrl", { defaultValue: "/" });
 
 	/**
 	 * Handle form submission
@@ -58,7 +60,7 @@ export default function RegisterPage() {
 				},
 				{
 					onSuccess: () => {
-						router.push("/");
+						router.push(callbackUrl);
 					},
 					onError: (ctx) => {
 						setError(

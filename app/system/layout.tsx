@@ -29,9 +29,8 @@ export default async function SystemLayout({
 	}
 
 	// Check if user is global admin
-	// @ts-expect-error - isGlobalAdmin is added to the user type via better-auth
 	if (!session.user.isGlobalAdmin) {
-		// Not a global admin, redirect to dashboard
+		console.warn("Global admin check failed for route: /system");
 		redirect("/dashboard");
 	}
 

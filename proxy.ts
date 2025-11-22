@@ -63,23 +63,17 @@ export default async function proxy(
 
 	// Check global admin access for admin routes
 	if (isGlobalAdminRoute && session) {
-		console.log("[DEBUG] System route accessed by:", session.user.email);
-		console.log(
-			"[DEBUG] Session user object:",
-			JSON.stringify(session.user, null, 2),
-		);
-
-		// @ts-expect-error - isGlobalAdmin is added to the user type via better-auth
 		const isGlobalAdmin = session.user.isGlobalAdmin === true;
 
-		console.log("[DEBUG] isGlobalAdmin value:", isGlobalAdmin);
-
 		if (!isGlobalAdmin) {
-			// Not a global admin, redirect to dashboard
+			console.warn(`Global admin check failed for route: ${pathname}`);
 			return NextResponse.redirect(new URL("/dashboard", request.url));
 		}
 
-		console.log("[DEBUG] User is global admin, allowing access");
+		// Optional: Log success with minimal info (user ID only, no PII)
+		console.log(
+			`Global admin check passed for route: ${pathname} (user: ${session.user.id})`,
+		);
 	}
 
 	// Redirect to dashboard if accessing auth routes with active session

@@ -12,36 +12,47 @@ import * as schema from "@/auth-schema";
 import { db } from "@/db";
 import { oauthProviders } from "@/db/schema";
 import { env } from "@/envConfig";
+import { safeDecrypt } from "@/lib/encryption";
 
 /**
- * Load OAuth providers from database
- * Returns array of provider configurations for better-auth
+ * Load OAuth providers from database with decrypted secrets
+ * Returns configurations ready for better-auth
  */
 async function loadOAuthProvidersFromDB() {
-	try {
-		const providers = await db
-			.select()
-			.from(oauthProviders)
-			.where(eq(oauthProviders.enabled, true));
+	const providers = await db
+		.select()
+		.from(oauthProviders)
+		.where(eq(oauthProviders.enabled, true))
+		.catch(() => []);
 
-		return providers.map((p) => ({
-			providerId: p.providerId,
-			clientId: p.clientId,
-			clientSecret: p.clientSecret,
-			authorizationUrl: p.authorizationUrl,
-			tokenUrl: p.tokenUrl,
-			userInfoUrl: p.userInfoUrl || undefined,
-			scopes: p.scopes.split(" "),
-			pkce: true,
-			redirectURI: `${env.NEXT_PUBLIC_APP_URL}/api/auth/callback/${p.providerId}`,
-		}));
-	} catch (error) {
-		console.error("Error loading OAuth providers from database:", error);
-		return [];
-	}
+	const decryptedProviders = await Promise.all(
+		providers.map(async (p) => {
+			const clientSecret = await safeDecrypt(p.clientSecret);
+			if (!clientSecret) {
+				console.warn(`Skipping provider ${p.providerId}: decryption failed`);
+				return null;
+			}
+
+			return {
+				providerId: p.providerId,
+				clientId: p.clientId,
+				clientSecret,
+				authorizationUrl: p.authorizationUrl,
+				tokenUrl: p.tokenUrl,
+				userInfoUrl: p.userInfoUrl || undefined,
+				scopes: p.scopes.split(" "),
+				pkce: true,
+				redirectURI: `${env.NEXT_PUBLIC_APP_URL}/api/auth/callback/${p.providerId}`,
+			};
+		}),
+	);
+
+	return decryptedProviders.filter(
+		(p): p is NonNullable<typeof p> => p !== null,
+	);
 }
 
-// Load OAuth providers from database (top-level await supported in Node 24+)
+// Load OAuth providers from database
 const allOAuthProviders = await loadOAuthProvidersFromDB();
 
 /**
