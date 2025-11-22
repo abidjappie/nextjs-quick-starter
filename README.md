@@ -97,6 +97,10 @@ DATABASE_URL="file:local.db"  # For local development with SQLite
 # Authentication (required for auth features)
 BETTER_AUTH_SECRET="your-secret-key-min-32-characters-long"  # Generate with: openssl rand -base64 32
 
+# Global Admin (required for /system admin panel access)
+GLOBAL_ADMIN_EMAIL="admin@example.com"
+GLOBAL_ADMIN_PASSWORD="your-secure-password"  # Change in production!
+
 # AI Providers (at least one recommended for AI features)
 OPENAI_API_KEY="sk-..."
 ANTHROPIC_API_KEY="sk-ant-..."
@@ -140,8 +144,11 @@ pnpm db:generate
 # Apply migrations to database
 pnpm db:migrate
 
-# Or push schema directly (development only)
-pnpm db:push
+# Seed the global admin user (required for /system access)
+pnpm db:seed
+
+# Or push schema directly (development only - skip seeding)
+# pnpm db:push
 ```
 
 ### 6. Start the development server
@@ -175,6 +182,7 @@ pnpm auth:generate  # Generate better-auth schema (auth-schema.ts)
 pnpm db:generate  # Generate migrations from schema changes
 pnpm db:push      # Push schema directly to database (dev only)
 pnpm db:migrate   # Run migrations
+pnpm db:seed      # Seed global admin user
 pnpm db:studio    # Open Drizzle Studio (database GUI)
 ```
 
@@ -191,17 +199,25 @@ nextjs-quick-starter/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API routes
 │   │   └── auth/             # better-auth API endpoints
+│   ├── system/               # Admin panel for OAuth management
+│   │   ├── page.tsx          # System dashboard
+│   │   ├── layout.tsx        # Protected layout (global admin only)
+│   │   └── actions.ts        # Provider CRUD operations
 │   ├── actions.ts            # Server actions (CRUD operations)
 │   ├── layout.tsx            # Root layout with Toaster
 │   ├── page.tsx              # Home page
 │   ├── globals.css           # Global styles (Tailwind v4)
 │   └── favicon.ico           # App icon
 ├── components/               # React components
+│   ├── system/               # System admin components
+│   │   ├── oauth-provider-table.tsx  # Provider list UI
+│   │   └── oauth-provider-form.tsx   # Provider form UI
 │   ├── ui/                   # shadcn/ui components
 │   │   └── sonner.tsx        # Toast component
 ├── db/                       # Database (Drizzle ORM)
 │   ├── index.ts              # Database client
-│   └── schema.ts             # Drizzle schema with Zod schemas
+│   ├── schema.ts             # Drizzle schema with Zod schemas
+│   └── seed.ts               # Database seeding (global admin)
 ├── lib/                      # Utility functions
 │   ├── auth.ts               # better-auth server configuration
 │   ├── auth-client.ts        # better-auth client hooks
@@ -327,6 +343,8 @@ const envSchema = z.object({
 
 ## 📚 Documentation
 
+- **[AUTHENTICATION.md](./AUTHENTICATION.md)** - Complete authentication guide with better-auth
+- **[OAUTH_SETUP.md](./OAUTH_SETUP.md)** - OAuth provider management and setup
 - [Next.js 16 Docs](https://nextjs.org/docs)
 - [React 19 Docs](https://react.dev)
 - [Drizzle ORM Docs](https://orm.drizzle.team)

@@ -18,7 +18,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:push": "drizzle-kit push",
 		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"db:seed": "tsx db/seed.ts"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^2.0.44",
@@ -31,6 +32,7 @@
 		"@tanstack/react-query-devtools": "^4.42.0",
 		"@tanstack/react-store": "^0.8.0",
 		"ai": "^5.0.93",
+		"bcryptjs": "^3.0.3",
 		"better-auth": "^1.3.34",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
@@ -49,8 +51,9 @@
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.2",
+		"@biomejs/biome": "2.3.7",
 		"@tailwindcss/postcss": "^4",
+		"@types/bcryptjs": "^2.4.6",
 		"@types/node": "^20",
 		"@types/react": "^19.2.5",
 		"@types/react-dom": "^19.2.3",

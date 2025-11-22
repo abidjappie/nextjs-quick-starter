@@ -13,10 +13,16 @@ import { auth } from "@/lib/auth";
  */
 const protectedRoutes: string[] = [
 	"/dashboard",
+	"/system",
 	// "/profile",
 	// "/settings",
 	// Add your protected routes here
 ];
+
+/**
+ * Routes that require global admin access
+ */
+const globalAdminRoutes: string[] = ["/system"];
 
 /**
  * Public routes that should redirect to dashboard if user is already authenticated
@@ -34,8 +40,11 @@ export default async function proxy(
 ): Promise<NextResponse> {
 	const pathname = request.nextUrl.pathname;
 
-	// Check if the current route is protected or an auth route
+	// Check if the current route is protected, requires admin, or is an auth route
 	const isProtectedRoute = protectedRoutes.some((route) =>
+		pathname.startsWith(route),
+	);
+	const isGlobalAdminRoute = globalAdminRoutes.some((route) =>
 		pathname.startsWith(route),
 	);
 	const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
@@ -50,6 +59,27 @@ export default async function proxy(
 		const loginUrl = new URL("/login", request.url);
 		loginUrl.searchParams.set("callbackUrl", pathname);
 		return NextResponse.redirect(loginUrl);
+	}
+
+	// Check global admin access for admin routes
+	if (isGlobalAdminRoute && session) {
+		console.log("[DEBUG] System route accessed by:", session.user.email);
+		console.log(
+			"[DEBUG] Session user object:",
+			JSON.stringify(session.user, null, 2),
+		);
+
+		// @ts-expect-error - isGlobalAdmin is added to the user type via better-auth
+		const isGlobalAdmin = session.user.isGlobalAdmin === true;
+
+		console.log("[DEBUG] isGlobalAdmin value:", isGlobalAdmin);
+
+		if (!isGlobalAdmin) {
+			// Not a global admin, redirect to dashboard
+			return NextResponse.redirect(new URL("/dashboard", request.url));
+		}
+
+		console.log("[DEBUG] User is global admin, allowing access");
 	}
 
 	// Redirect to dashboard if accessing auth routes with active session

@@ -17,6 +17,15 @@ const envSchema = z.object({
 		.min(32, "BETTER_AUTH_SECRET must be at least 32 characters")
 		.default("development-secret-change-in-production-min-32-chars"),
 
+	// Global Admin Configuration (required for system operator access)
+	GLOBAL_ADMIN_EMAIL: z
+		.email("GLOBAL_ADMIN_EMAIL must be a valid email")
+		.default("admin@example.com"),
+	GLOBAL_ADMIN_PASSWORD: z
+		.string()
+		.min(8, "GLOBAL_ADMIN_PASSWORD must be at least 8 characters")
+		.default("admin123"), // Change this in production!
+
 	// AI Provider API Keys (all optional, but at least one recommended)
 	OPENAI_API_KEY: z.string().optional(),
 	ANTHROPIC_API_KEY: z.string().optional(),
@@ -28,20 +37,6 @@ const envSchema = z.object({
 	// GOOGLE_CLIENT_ID: z.string().min(1).optional(),
 	// GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 
-	// Custom OAuth IDP Configuration
-	OAUTH_IDP_ENABLED: z
-		.string()
-		.optional()
-		.default("false")
-		.transform((val) => val === "true"),
-	OAUTH_IDP_NAME: z.string().optional().default("Custom IDP"), // Display name for the IDP
-	OAUTH_IDP_CLIENT_ID: z.string().optional(),
-	OAUTH_IDP_CLIENT_SECRET: z.string().optional(),
-	OAUTH_IDP_AUTHORIZATION_ENDPOINT: z.string().url().optional(), // e.g., https://idp.example.com/oauth/authorize
-	OAUTH_IDP_TOKEN_ENDPOINT: z.string().url().optional(), // e.g., https://idp.example.com/oauth/token
-	OAUTH_IDP_USERINFO_ENDPOINT: z.string().url().optional(), // e.g., https://idp.example.com/oauth/userinfo
-	OAUTH_IDP_SCOPES: z.string().optional().default("openid profile email"), // Space-separated scopes
-
 	// Application configuration
 	NODE_ENV: z
 		.enum(["development", "production", "test"])
@@ -49,12 +44,6 @@ const envSchema = z.object({
 
 	// Client-safe variables (NEXT_PUBLIC_ prefix)
 	NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
-	NEXT_PUBLIC_OAUTH_IDP_ENABLED: z
-		.string()
-		.optional()
-		.default("false")
-		.transform((val) => val === "true"),
-	NEXT_PUBLIC_OAUTH_IDP_NAME: z.string().optional().default("Custom IDP"),
 });
 
 // Validate environment variables at startup
