@@ -89,13 +89,14 @@ async function seedGlobalAdmin() {
 			.where(eq(user.id, result.user.id));
 
 		console.log(`✅ Global admin user created successfully!`);
-		console.log(`📧 Email: ${adminEmail}`);
-		console.log(`🔑 Password: ${adminPassword}`);
-		console.log(
-			`\n⚠️  IMPORTANT: Change the password immediately in production!`,
-		);
+		console.log(`📧 Use your configured credentials to log in`);
 	} catch (error) {
 		console.error(`❌ Error seeding global admin:`, error);
+		if (error instanceof Error && error.message.includes("password")) {
+			console.error(
+				`\n💡 Password must meet complexity requirements (min 12 chars, 1 upper, 1 lower, 1 digit, 1 special char)`,
+			);
+		}
 		throw error;
 	}
 }

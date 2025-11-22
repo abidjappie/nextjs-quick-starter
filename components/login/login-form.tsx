@@ -6,21 +6,21 @@
  */
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
-import type { OAuthProvider } from "@/db/schema";
+import type { ClientSafeOAuthProvider } from "@/db/schema";
 import { signIn } from "@/lib/auth-client";
 
 interface LoginFormProps {
-	oauthProviders: OAuthProvider[];
+	oauthProviders: ClientSafeOAuthProvider[];
 }
 
 export function LoginForm({ oauthProviders }: LoginFormProps) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const searchParams = useSearchParams();
-	const callbackUrl = searchParams.get("callbackUrl") || "/";
+	const [callbackUrl] = useQueryState("callbackUrl", { defaultValue: "/" });
 
 	/**
 	 * Handle form submission

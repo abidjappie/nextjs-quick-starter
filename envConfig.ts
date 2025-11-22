@@ -18,13 +18,37 @@ const envSchema = z.object({
 		.default("development-secret-change-in-production-min-32-chars"),
 
 	// Global Admin Configuration (required for system operator access)
-	GLOBAL_ADMIN_EMAIL: z
-		.email("GLOBAL_ADMIN_EMAIL must be a valid email")
-		.default("admin@example.com"),
+	GLOBAL_ADMIN_EMAIL: z.email("GLOBAL_ADMIN_EMAIL must be a valid email"),
 	GLOBAL_ADMIN_PASSWORD: z
 		.string()
-		.min(8, "GLOBAL_ADMIN_PASSWORD must be at least 8 characters")
-		.default("admin123"), // Change this in production!
+		.min(
+			12,
+			"GLOBAL_ADMIN_PASSWORD must be at least 12 characters (required: 1 uppercase, 1 lowercase, 1 digit, 1 special character)",
+		)
+		.regex(
+			/[A-Z]/,
+			"GLOBAL_ADMIN_PASSWORD must contain at least one uppercase letter",
+		)
+		.regex(
+			/[a-z]/,
+			"GLOBAL_ADMIN_PASSWORD must contain at least one lowercase letter",
+		)
+		.regex(/[0-9]/, "GLOBAL_ADMIN_PASSWORD must contain at least one digit")
+		.regex(
+			/[^A-Za-z0-9]/,
+			"GLOBAL_ADMIN_PASSWORD must contain at least one special character",
+		),
+
+	// Encryption key for sensitive data (OAuth client secrets)
+	// Must be 32 bytes (64 hex characters) for AES-256-GCM
+	// Generate with: openssl rand -hex 32
+	ENCRYPTION_KEY: z
+		.string()
+		.length(64, "ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)")
+		.regex(
+			/^[0-9a-f]{64}$/,
+			"ENCRYPTION_KEY must be a valid hex string (generate with: openssl rand -hex 32)",
+		),
 
 	// AI Provider API Keys (all optional, but at least one recommended)
 	OPENAI_API_KEY: z.string().optional(),

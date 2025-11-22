@@ -32,7 +32,7 @@ export const oauthProviders = sqliteTable("oauth_providers", {
 	name: text("name").notNull(), // Display name
 	providerId: text("provider_id").notNull().unique(), // Unique identifier for the provider
 	clientId: text("client_id").notNull(),
-	clientSecret: text("client_secret").notNull(), // Should be encrypted in production
+	clientSecret: text("client_secret").notNull(), // Encrypted with AES-256-GCM
 	authorizationUrl: text("authorization_url").notNull(),
 	tokenUrl: text("token_url").notNull(),
 	userInfoUrl: text("user_info_url"), // Optional
@@ -115,6 +115,7 @@ export const createOAuthProviderFormSchema = insertOAuthProviderSchema.omit({
 
 export const updateOAuthProviderFormSchema = insertOAuthProviderSchema
 	.omit({
+		providerId: true, // Provider ID cannot be changed after creation
 		createdAt: true,
 		updatedAt: true,
 	})
@@ -130,7 +131,16 @@ export type InsertTodo = z.infer<typeof insertTodoSchema>;
 export type CreateTodoForm = z.infer<typeof createTodoFormSchema>;
 export type UpdateTodo = z.infer<typeof updateTodoSchema>;
 
+/**
+ * This type should not be used in the client. It contains sensitive data like client secret and client ID.
+ * Instead, use the ClientSafeOAuthProvider type.
+ */
 export type OAuthProvider = typeof oauthProviders.$inferSelect;
+export type ClientSafeOAuthProvider = {
+	id: number;
+	providerId: string;
+	name: string;
+};
 export type InsertOAuthProvider = z.infer<typeof insertOAuthProviderSchema>;
 export type CreateOAuthProviderForm = z.infer<
 	typeof createOAuthProviderFormSchema
