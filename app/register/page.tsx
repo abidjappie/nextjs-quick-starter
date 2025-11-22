@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signUp } from "@/lib/auth-client";
+import { useSafeCallbackUrl } from "@/lib/use-safe-callback-url";
 
 /**
  * Register Page Component
@@ -19,6 +20,7 @@ export default function RegisterPage() {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
+	const callbackUrl = useSafeCallbackUrl("/");
 
 	/**
 	 * Handle form submission
@@ -58,7 +60,7 @@ export default function RegisterPage() {
 				},
 				{
 					onSuccess: () => {
-						router.push("/");
+						router.push(callbackUrl);
 					},
 					onError: (ctx) => {
 						setError(

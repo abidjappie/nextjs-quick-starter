@@ -18,6 +18,7 @@ A modern Next.js starter template with best practices built-in. Features Next.js
 - 🎉 **Sonner** for beautiful toast notifications
 - 📅 **date-fns** for date manipulation and formatting
 - 🤖 **Vercel AI SDK** with OpenAI, Anthropic, and Google providers
+- 🔗 **nuqs** for type-safe URL search params management
 - 🔧 **Biome** for fast linting and formatting
 - 🪝 **Lefthook** for git hooks
 - 🌍 **i18next** for internationalization
@@ -53,6 +54,7 @@ A modern Next.js starter template with best practices built-in. Features Next.js
 
 ### Utilities
 - **date-fns**: v4 for date manipulation and formatting
+- **nuqs**: v2.8 for type-safe URL search params
 
 ### AI & ML
 - **Vercel AI SDK**: v5
@@ -97,6 +99,14 @@ DATABASE_URL="file:local.db"  # For local development with SQLite
 # Authentication (required for auth features)
 BETTER_AUTH_SECRET="your-secret-key-min-32-characters-long"  # Generate with: openssl rand -base64 32
 
+# Global Admin (required for /system admin panel access)
+GLOBAL_ADMIN_EMAIL="admin@example.com"
+GLOBAL_ADMIN_PASSWORD="YourSecure123!Pass"  # Min 12 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char
+
+# Encryption Key (required for encrypting OAuth client secrets)
+# Generate with: openssl rand -hex 32
+ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"  # MUST be exactly 64 hex characters (32 bytes)
+
 # AI Providers (at least one recommended for AI features)
 OPENAI_API_KEY="sk-..."
 ANTHROPIC_API_KEY="sk-ant-..."
@@ -120,7 +130,10 @@ DATABASE_URL="libsql://your-database.turso.io"
 DATABASE_AUTH_TOKEN="your-auth-token"
 ```
 
-> **Note**: Environment variables are validated at startup using Zod. See `envConfig.ts` for the validation schema.
+> **Security Note**: 
+> - `GLOBAL_ADMIN_PASSWORD` must be at least 12 characters with 1 uppercase, 1 lowercase, 1 digit, and 1 special character
+> - `ENCRYPTION_KEY` must be generated with `openssl rand -hex 32` (never use a simple pattern)
+> - Environment variables are validated at startup using Zod. See `envConfig.ts` for the validation schema.
 
 ### 4. Generate authentication schema
 
@@ -140,8 +153,11 @@ pnpm db:generate
 # Apply migrations to database
 pnpm db:migrate
 
-# Or push schema directly (development only)
-pnpm db:push
+# Seed the global admin user (required for /system access)
+pnpm db:seed
+
+# Or push schema directly (development only - skip seeding)
+# pnpm db:push
 ```
 
 ### 6. Start the development server
@@ -175,6 +191,7 @@ pnpm auth:generate  # Generate better-auth schema (auth-schema.ts)
 pnpm db:generate  # Generate migrations from schema changes
 pnpm db:push      # Push schema directly to database (dev only)
 pnpm db:migrate   # Run migrations
+pnpm db:seed      # Seed global admin user
 pnpm db:studio    # Open Drizzle Studio (database GUI)
 ```
 
@@ -191,17 +208,25 @@ nextjs-quick-starter/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API routes
 │   │   └── auth/             # better-auth API endpoints
+│   ├── system/               # Admin panel for OAuth management
+│   │   ├── page.tsx          # System dashboard
+│   │   ├── layout.tsx        # Protected layout (global admin only)
+│   │   └── actions.ts        # Provider CRUD operations
 │   ├── actions.ts            # Server actions (CRUD operations)
 │   ├── layout.tsx            # Root layout with Toaster
 │   ├── page.tsx              # Home page
 │   ├── globals.css           # Global styles (Tailwind v4)
 │   └── favicon.ico           # App icon
 ├── components/               # React components
+│   ├── system/               # System admin components
+│   │   ├── oauth-provider-table.tsx  # Provider list UI
+│   │   └── oauth-provider-form.tsx   # Provider form UI
 │   ├── ui/                   # shadcn/ui components
 │   │   └── sonner.tsx        # Toast component
 ├── db/                       # Database (Drizzle ORM)
 │   ├── index.ts              # Database client
-│   └── schema.ts             # Drizzle schema with Zod schemas
+│   ├── schema.ts             # Drizzle schema with Zod schemas
+│   └── seed.ts               # Database seeding (global admin)
 ├── lib/                      # Utility functions
 │   ├── auth.ts               # better-auth server configuration
 │   ├── auth-client.ts        # better-auth client hooks
@@ -313,6 +338,194 @@ export function MyComponent() {
 }
 ```
 
+### Manage URL Search Params with nuqs
+
+**nuqs** provides type-safe, performant URL search param management as a replacement for Next.js's `useSearchParams`. It offers better DX with automatic URL updates, TypeScript support, and built-in parsers.
+
+**Why use nuqs over useSearchParams:**
+- ✅ Type-safe with built-in parsers (string, number, boolean, etc.)
+- ✅ Automatic URL synchronization
+- ✅ Server-side rendering support
+- ✅ Better performance (no unnecessary re-renders)
+- ✅ Cleaner API with state-like syntax
+- ✅ Built-in shallow routing
+
+**Setup (Already configured):**
+
+The `NuqsAdapter` is already set up in `app/layout.tsx`:
+
+```typescript
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <NuqsAdapter>{children}</NuqsAdapter>
+      </body>
+    </html>
+  );
+}
+```
+
+**Basic Usage:**
+
+```typescript
+"use client";
+
+import { useQueryState } from "nuqs";
+
+export function SearchComponent() {
+  // Simple string param with default value
+  const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+  
+  return (
+    <div>
+      <input 
+        value={search} 
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search..."
+      />
+      <p>Searching for: {search}</p>
+    </div>
+  );
+}
+```
+
+**Type-Safe Parsers:**
+
+```typescript
+import { useQueryState, parseAsInteger, parseAsBoolean } from "nuqs";
+
+export function FilterComponent() {
+  // Number parameter
+  const [page, setPage] = useQueryState(
+    "page", 
+    parseAsInteger.withDefault(1)
+  );
+  
+  // Boolean parameter
+  const [showArchived, setShowArchived] = useQueryState(
+    "archived",
+    parseAsBoolean.withDefault(false)
+  );
+  
+  return (
+    <div>
+      <button onClick={() => setPage(page + 1)}>
+        Next Page (Current: {page})
+      </button>
+      <label>
+        <input
+          type="checkbox"
+          checked={showArchived}
+          onChange={(e) => setShowArchived(e.target.checked)}
+        />
+        Show Archived
+      </label>
+    </div>
+  );
+}
+```
+
+**Multiple Query States:**
+
+```typescript
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+
+export function ProductFilters() {
+  const [filters, setFilters] = useQueryStates({
+    category: parseAsString.withDefault("all"),
+    minPrice: parseAsInteger.withDefault(0),
+    maxPrice: parseAsInteger.withDefault(1000),
+    sort: parseAsString.withDefault("name"),
+  });
+  
+  return (
+    <div>
+      <select 
+        value={filters.category}
+        onChange={(e) => setFilters({ category: e.target.value })}
+      >
+        <option value="all">All</option>
+        <option value="electronics">Electronics</option>
+      </select>
+      
+      <input
+        type="number"
+        value={filters.minPrice}
+        onChange={(e) => setFilters({ minPrice: parseInt(e.target.value) })}
+      />
+      
+      {/* Reset all filters */}
+      <button onClick={() => setFilters(null)}>
+        Clear Filters
+      </button>
+    </div>
+  );
+}
+```
+
+**With Callback URL (Login Example):**
+
+```typescript
+"use client";
+
+import { useSafeCallbackUrl } from "@/lib/use-safe-callback-url";
+import { useRouter } from "next/navigation";
+
+export function LoginForm() {
+  const callbackUrl = useSafeCallbackUrl("/");
+  const router = useRouter();
+  
+  async function handleLogin() {
+    // ... authentication logic
+    router.push(callbackUrl); // Redirect to safe callback URL
+  }
+  
+  return <form onSubmit={handleLogin}>...</form>;
+}
+```
+
+**Server-Side Usage:**
+
+```typescript
+// app/products/page.tsx
+import { parseAsInteger, parseAsString } from "nuqs/server";
+
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  
+  // Parse server-side search params
+  const page = parseAsInteger.withDefault(1).parseServerSide(params.page);
+  const category = parseAsString.withDefault("all").parseServerSide(params.category);
+  
+  const products = await fetchProducts({ page, category });
+  
+  return <ProductList products={products} />;
+}
+```
+
+**Built-in Parsers:**
+- `parseAsString` - String values
+- `parseAsInteger` - Integer numbers
+- `parseAsFloat` - Float numbers
+- `parseAsBoolean` - Boolean values
+- `parseAsTimestamp` - Unix timestamps
+- `parseAsIsoDateTime` - ISO date strings
+- `parseAsStringEnum` - Enum values
+- `parseAsArrayOf` - Arrays of any type
+- `parseAsJson` - JSON objects
+
+**Official Documentation:**
+- [nuqs Documentation](https://nuqs.dev/docs)
+
 ## 🌍 Environment Variables
 
 Environment variables are validated using Zod in `envConfig.ts`. Add new variables:
@@ -327,6 +540,8 @@ const envSchema = z.object({
 
 ## 📚 Documentation
 
+- **[AUTHENTICATION.md](./AUTHENTICATION.md)** - Complete authentication guide with better-auth
+- **[OAUTH_SETUP.md](./OAUTH_SETUP.md)** - OAuth provider management and setup
 - [Next.js 16 Docs](https://nextjs.org/docs)
 - [React 19 Docs](https://react.dev)
 - [Drizzle ORM Docs](https://orm.drizzle.team)
@@ -334,6 +549,7 @@ const envSchema = z.object({
 - [Vercel AI SDK Docs](https://sdk.vercel.ai)
 - [shadcn/ui Docs](https://ui.shadcn.com)
 - [Zod Docs](https://zod.dev)
+- [nuqs Docs](https://nuqs.dev)
 
 ## 🤝 Contributing
 
